@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: weather_daily
+    description: "Daily aggregated weather measurements."
+
+    columns:
+      - name: date
+        description: "Date of the weather measurements."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: average_temperature
+        description: "Average temperature for the day."
+        data_tests:
+          - not_null
+
+      - name: average_humidity
+        description: "Average humidity for the day."
+        data_tests:
+          - not_null
+  
+
+  - name: weather_hourly
+    description: "Hourly weather predictions."
+
+    columns:
+      - name: time
+        description: "Time of the weather data."
+        data_tests:
+          - not_null
+
+
+  - name: weather_monthly
+    description: "Monthly aggregated weather measurements."
+
+    columns:
+      - name: month 
+        description: "Monthly aggregated weather measurements."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: average_temperature
+        description: "Average temperature for the month."
+        data_tests:
+          - not_null
+      
+      - name: average_precipitation
+        description: "Average precipitation for the month"
+        data_tests:
+          - not_null

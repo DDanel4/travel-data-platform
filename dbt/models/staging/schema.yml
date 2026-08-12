@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: stg_weather
+    description: "Staging model for weather data."
+
+    columns:
+      - name: id
+        description: "Unique identifier for the weather record."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: date
+        description: "Timestamp of the weather observation."
+        data_tests:
+          - not_null
