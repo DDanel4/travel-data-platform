@@ -18,11 +18,9 @@ log_file_path = BASE_DIR / "etl_project.log"
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] (%(filename)s) %(message)s", # Toont nu ook de bestandsnaam!
+    format="%(asctime)s [%(levelname)s] (%(filename)s) %(message)s", 
     handlers=[
         logging.StreamHandler(),                # Terminal output
         logging.FileHandler(log_file_path)      # Centrale logfile
     ]
 )
-
-

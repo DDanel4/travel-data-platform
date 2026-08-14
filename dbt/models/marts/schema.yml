@@ -47,7 +47,7 @@ models:
         data_tests:
           - not_null
       
-      - name: average_precipitation
-        description: "Average precipitation for the month"
+      - name: total_precipitation
+        description: "Total precipitation for the month"
         data_tests:
           - not_null
