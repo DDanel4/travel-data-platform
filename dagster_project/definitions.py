@@ -11,10 +11,20 @@ dbt_resource = DbtCliResource(
     profiles_dir=os.fspath("C:/Users/danel/.dbt"),
 )
 
+daily_assest_selection = dg.AssetSelection.assets(weather_data,load_weather,dbt_models)
+
+daily_schedule = dg.ScheduleDefinition(
+                    name = "daily_schedule",
+                    target = daily_assest_selection,
+                    cron_schedule = "0 0 * * *",
+                    execution_timezone = "Europe/Amsterdam"
+)
+
 defs = dg.Definitions(  
                         assets = [weather_data, 
                                 load_weather,
                                 dbt_models],
                         resources={"dbt" : dbt_resource,
-                                   },    
+                                   },  
+                        schedules = [daily_schedule],
                     )
