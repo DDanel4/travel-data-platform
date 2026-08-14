@@ -2,7 +2,8 @@
 import logging
 import scripts.utils.environment as env
 import scripts.utils.api_weather as api
-from sqlalchemy import  Column, DateTime, inspect, Float, Table, MetaData, Integer, String, UniqueConstraint, create_engine
+from sqlalchemy import  (Column, DateTime, inspect, Float, Table, MetaData, Integer, 
+                         String, UniqueConstraint, create_engine)
 
 database_url = f"postgresql+psycopg2://{env.user}:{env.password}@localhost:5432/travel_db"
 

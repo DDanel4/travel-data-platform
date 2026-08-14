@@ -4,3 +4,5 @@ sqlalchemy
 psycopg2-binary
 openmeteo-requests
 python-dotenv
+dagster
+dagster-webserver
