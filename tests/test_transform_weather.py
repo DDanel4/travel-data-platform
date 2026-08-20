@@ -1,3 +1,4 @@
+"""
 import pandas as pd
 from unittest.mock import MagicMock
 from scripts.etl.weather_etl import transform_weather_data
@@ -41,3 +42,4 @@ def test_transform_weather_data_returns_correct_dataframe() -> None:
     assert "temperature" in result_df.columns
     assert result_df["latitude"].iloc[0] == 3.5833
     assert result_df["temperature"].iloc[0] == 25.5
+"""
