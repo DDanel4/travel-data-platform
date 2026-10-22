@@ -8,8 +8,10 @@ import scripts.utils.database as database
 
 
 def extract_weather_data() -> list[any]:
+    params = api.get_weather_params()
+
     try:
-        responses: list[any] = api.openmeteo.weather_api(api.url, params = api.params)
+        responses: list[any] = api.openmeteo.weather_api(api.url, params = params)
         return responses
     except Exception as error:
         logging.error(f"API connection error: {error}")
@@ -56,19 +58,12 @@ def load_weather_data(df : pd.DataFrame) -> None:
     except Exception as error:
         logging.error(f"ETL error during insert: {error}")
 
-if __name__ == "__main__": 
-    try:
-        with database.engine.connect() as connection:
-            with connection.begin():
-                database.create_tables()
-    except Exception as error:
-        logging.error(f"Database initialization error: {error}")
-        exit(1)
-
+def run_weather_etl() -> None: 
+    ##locations_etl
     raw_responses = extract_weather_data()
 
     for response in raw_responses:
         transformed_df  = transform_weather_data(response)
         load_weather_data(transformed_df)
 
-    logging.info("--- ETL pipline completed ---")
+    logging.info("--- Weather ETL pipline completed ---")
