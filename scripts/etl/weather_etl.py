@@ -3,7 +3,6 @@ import pandas as pd
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 import scripts.utils.api_weather as api
 import scripts.utils.database as database
-##python -m scripts.etl.weather_etl
 
 
 

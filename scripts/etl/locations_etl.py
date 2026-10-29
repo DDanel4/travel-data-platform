@@ -99,4 +99,3 @@ def run_locations_etl() -> None:
     df = extract_locations()
     df = transform_locations(df)
     load_locations(df)
-
