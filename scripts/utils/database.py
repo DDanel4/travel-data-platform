@@ -19,8 +19,7 @@ def create_base_columns() -> list:
     return [
         Column("id", Integer, primary_key=True, autoincrement=True),
         Column("date", DateTime(timezone=True)),
-        Column("latitude", Float),     
-        Column("longitude", Float),
+        Column("location_id", Integer),  
         ]
 
 def create_dynamic_columns(mapping) -> list:
@@ -29,9 +28,9 @@ def create_dynamic_columns(mapping) -> list:
         for db_name in mapping.values()
         ]
 
-def create_constraints(name) -> list:
+def create_constraints(name) -> UniqueConstraint:
     return [
-        UniqueConstraint('date', 'latitude', 'longitude', name=name)
+        UniqueConstraint('date', 'location_id', name=name)
         ]
 
 weather = Table(
@@ -101,7 +100,7 @@ def create_tables() -> None:
 
 def load_locations(engine):
     query = text("""
-                SELECT latitude, longitude, name
+                SELECT latitude, longitude, name, id
                 FROM place
                     """)
     with engine.connect() as connection:

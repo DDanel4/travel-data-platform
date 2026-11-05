@@ -6,9 +6,8 @@ import scripts.utils.database as database
 
 
 
-def extract_weather_data() -> list[any]:
-    params = api.get_weather_params()
-
+def extract_weather_data(latitude : float, longitude : float) -> list[any]:
+    params = api.get_weather_params(latitude, longitude)
     try:
         responses: list[any] = api.openmeteo.weather_api(api.url, params = params)
         return responses
@@ -16,9 +15,7 @@ def extract_weather_data() -> list[any]:
         logging.error(f"API connection error: {error}")
         return[]
 
-def transform_weather_data(response : any) -> pd.DataFrame:
-    latitude = response.Latitude()
-    longitude = response.Longitude()
+def transform_weather_data(response : any, location_id : int) -> pd.DataFrame:
     hourly = response.Hourly()
     hourly_data = {
         "date": pd.date_range(
@@ -32,8 +29,7 @@ def transform_weather_data(response : any) -> pd.DataFrame:
         hourly_data[db_name] = hourly.Variables(index).ValuesAsNumpy()
 
     hourly_dataframe = pd.DataFrame(data = hourly_data)
-    hourly_dataframe["latitude"] = latitude
-    hourly_dataframe["longitude"] = longitude
+    hourly_dataframe["location_id"] = location_id
 
     return hourly_dataframe
 
@@ -43,7 +39,7 @@ def load_weather_data(df : pd.DataFrame) -> None:
             with connection.begin():
                 stmt = pg_insert(database.weather)
                 stmt_on_conflict = stmt.on_conflict_do_update(
-                    index_elements=['date', 'latitude', 'longitude'],
+                    index_elements=['date', 'location_id'],
                     set_={
                         'temperature': stmt.excluded.temperature,
                         'precipitation': stmt.excluded.precipitation,
@@ -57,12 +53,19 @@ def load_weather_data(df : pd.DataFrame) -> None:
     except Exception as error:
         logging.error(f"ETL error during insert: {error}")
 
-def run_weather_etl() -> None: 
+def run_weather_etl(locations : pd.DataFrame) -> None: 
     ##locations_etl
-    raw_responses = extract_weather_data()
+    for location in locations.itertuples(index=False):
 
-    for response in raw_responses:
-        transformed_df  = transform_weather_data(response)
-        load_weather_data(transformed_df)
+        location_id = location.id
+        latitude = location.latitude
+        longitude = location.longitude
+
+
+        raw_responses = extract_weather_data(latitude, longitude)
+
+        for response in raw_responses:
+            transformed_df  = transform_weather_data(response, location_id)
+            load_weather_data(transformed_df)
 
     logging.info("--- Weather ETL pipline completed ---")

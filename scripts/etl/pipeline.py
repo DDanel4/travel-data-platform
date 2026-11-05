@@ -13,9 +13,11 @@ if __name__ == "__main__":
     logging.info("Run locations ETL")
     locations.run_locations_etl()
 
+    all_locations = database.load_locations(database.engine)
+
     logging.info("Run weather ETL")
-    weather.run_weather_etl()
+    weather.run_weather_etl(all_locations)
 
     logging.info("Run air quality ETL")
-    air_quality.run_air_quality_etl()
+    air_quality.run_air_quality_etl(all_locations)
     

@@ -6,8 +6,8 @@ import scripts.utils.database as database
 
 
 
-def extract_air_quality_data () -> list[any]:
-    params = api.get_air_quality_params()
+def extract_air_quality_data (latitude : float, longitude : float) -> list[any]:
+    params = api.get_air_quality_params(latitude, longitude)
 
     try:
         responses: list[any] = api.openmeteo.weather_api(api.url, params = params)
@@ -16,9 +16,7 @@ def extract_air_quality_data () -> list[any]:
         logging.error(f"API connection error: {error}")
         return[]
 
-def transform_air_quality_data(response : any) -> pd.DataFrame:
-    latitude = response.Latitude()
-    longitude = response.Longitude()
+def transform_air_quality_data(response : any, location_id : int) -> pd.DataFrame:
     hourly = response.Hourly()      
     hourly_data = {
         "date": pd.date_range(
@@ -32,8 +30,7 @@ def transform_air_quality_data(response : any) -> pd.DataFrame:
         hourly_data[db_name] = hourly.Variables(index).ValuesAsNumpy()
 
     hourly_dataframe = pd.DataFrame(data = hourly_data)
-    hourly_dataframe["latitude"] = latitude
-    hourly_dataframe["longitude"] = longitude
+    hourly_dataframe["location_id"] = location_id
 
     return hourly_dataframe
 
@@ -43,7 +40,7 @@ def load_air_quality_data(df : pd.DataFrame) -> None:
             with connection.begin():
                 stmt = pg_insert(database.air_quality)
                 stmt_on_conflict = stmt.on_conflict_do_update(
-                    index_elements=["date","latitude","longitude"],
+                    index_elements=["date","location_id"],
                     set_= {
                         "particulate_matte10" : stmt.excluded.particulate_matte10,
                         "particulate_matte2_5" : stmt.excluded.particulate_matte2_5
@@ -57,11 +54,16 @@ def load_air_quality_data(df : pd.DataFrame) -> None:
     except Exception as error:
         logging.error(f"ETL error during insert: {error}")
 
-def run_air_quality_etl() -> None:
-    raw_responses = extract_air_quality_data()
+def run_air_quality_etl(locations : pd.DataFrame) -> None:
+    for location in locations.itertuples(index=False):
+        location_id = location.id
+        latitude = location.latitude
+        longitude = location.longitude
 
-    for response in raw_responses:
-        transformed_df  = transform_air_quality_data(response)
-        load_air_quality_data(transformed_df)
+        raw_responses = extract_air_quality_data(latitude, longitude)
+
+        for response in raw_responses:
+            transformed_df  = transform_air_quality_data(response, location_id)
+            load_air_quality_data(transformed_df)
 
     logging.info("--- Air quality ETL pipline completed ---")
